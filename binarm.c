@@ -242,7 +242,7 @@ read_fragment(uint8_t *frag, size_t fraglen)
 }
 
 
-static void
+static ssize_t
 find_frag(uint8_t *f, size_t l, size_t foff, uint8_t *frag, size_t fraglen)
 {
 	size_t	i = 0;
@@ -270,8 +270,10 @@ find_frag(uint8_t *f, size_t l, size_t foff, uint8_t *frag, size_t fraglen)
 		printf("FOUND STARTING AT +%lx (%lx)\n",
 		    (long unsigned)start,
 		    (long unsigned)start+foff);
+		return start+foff;
 	} else {
 		printf("NOT FOUND\n");
+		return -1;
 	}
 }
 
@@ -280,6 +282,7 @@ processor(uint8_t *f, int fd, size_t l)
 {
 	uint8_t	frag[33];
 	size_t	start, off;
+	ssize_t	scan;
 	int	rc = EXIT_SUCCESS;
 	int	stop = 0;
 	char	ch;
@@ -396,6 +399,28 @@ processor(uint8_t *f, int fd, size_t l)
 			}
 
 			printhex(f+start, off, start);
+			break;
+		case 's':
+			if (readnum(&start) || (start >= l)) {
+				printf("\nINVALID START\n");
+				break;
+			}
+
+			if (readnum(&off)) {
+				printf("\nINVALID LENGTH\n");
+				break;
+			}
+
+			if (-1 == read_fragment(frag, off)) {
+				printf("\nINVALID FRAGMENT\n");
+				break;
+			}
+
+			printf("\nSCAN FRAG FROM %lx SIZE %lu\n", start, off);
+			while (-1 != (scan = find_frag(f+start, l-start,
+					    start, frag, off))) {
+				start += scan + 1;
+			}
 			break;
 		case 'w':
 			if (readnum(&start) || (start >=l)) {

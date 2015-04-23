@@ -15,6 +15,8 @@ COMMANDS:
 	q		Quit. This should be the first command you enter.
 	r start offset	Read (and print) a hex dump of offset bytes from
 			the file starting at start.
+	s offset size	Scan for all instances of the size-sized
+			fragment starting at offset.
 	w start		Start writing to the file at start.
 
 
@@ -48,6 +50,15 @@ EXAMPLE:
 
 	FIND FRAG FROM 2 SIZE 3
 	FOUND STARTING AT +4 (6)
+
+	> s 0 1
+	F> 6c
+	SCAN FRAG FROM 0 SIZE 1
+	FOUND STARTING AT +0 (0)
+	FOUND STARTING AT +0 (1)
+	FOUND STARTING AT +0 (3)
+	FOUND STARTING AT +0 (7)
+	NOT FOUND
 
 	> q
 	QUIT
