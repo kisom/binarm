@@ -16,3 +16,4 @@ binarm.$(RELEASE): binarm.c
 
 clean:
 	rm -f binarm binarm.$(RELEASE) *.o *core*
+

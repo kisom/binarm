@@ -9,6 +9,8 @@ are separated by spaces, commands are terminated with spaces or newlines.
 COMMANDS:
 
 	e offset	Extend file +offset bytes.
+	f offset size	Find a size sequence of bytes starting at
+			offset. The maximum size is 32 bytes.
 	q		Quit. This should be the first command you enter.
 	r start offset	Read (and print) a hex dump of offset bytes from
 			the file starting at start.
@@ -39,6 +41,13 @@ EXAMPLE:
 	68 65 6c 6c 6f 20 77 6f  72 6c 64 21 0a 0a 48 49 
 	21 0a 
 	
+
+	> f 2 3
+	F> 77 6f 72
+
+	FIND FRAG FROM 2 SIZE 3
+	FOUND STARTING AT +4 (6)
+
 	> q
 	QUIT
 	$ cat test.txt 

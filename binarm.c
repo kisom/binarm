@@ -32,6 +32,7 @@
 
 static int		tmod = 0;
 static struct termios	torig;
+const  size_t		fragmax = 32;
 
 
 static int
@@ -126,6 +127,7 @@ printhex(uint8_t *buf, size_t l)
 	size_t	i;
 	long    n = (long)l;
 
+	printf("\n");
 	l = 0;
 	while (n >= 0) {
 		for (i = 0; i < 8 && --n >= 0; i++) {
@@ -203,8 +205,79 @@ writehex(uint8_t *buf, size_t lim)
 
 
 static int
+read_fragment(uint8_t *frag, size_t fraglen)
+{
+	size_t	i = 0, nib = 0;
+	char	ch;
+	char	prev;
+
+	printf("\nF> ");
+	memset(frag, 0, fragmax+1);
+	while (0x20 == (ch = fgetc(stdin))) printf("%c", ch);
+
+	while (((0x20 == ch) || hexdigit(ch)) && (i < fraglen)) {
+		printf("%c", ch);
+		if (0x20 != ch) {
+			if (nib) {
+				frag[i++] = (prev<<4)+gethexdigit(ch);
+				nib = 0;
+			} else {
+				nib++;
+				prev = gethexdigit(ch);
+			}
+		}	
+		ch = fgetc(stdin);
+	}
+
+	if (i != fraglen && ((0x20 != ch) && (0x0a != ch) && (0x0d != ch))) {
+		memset(frag, 0, fragmax+1);
+		printf("%c\n", ch);
+		return -1;
+	}
+
+
+	printf("%c", ch);
+	return 0;	
+}
+
+
+static void
+find_frag(uint8_t *f, size_t l, size_t foff, uint8_t *frag, size_t fraglen)
+{
+	size_t	i = 0;
+	size_t	off = 0;
+	size_t  start = 0;
+	uint8_t	found = 0;
+
+	while (!found && (i < l)) {
+		if (frag[off] != f[i]) {
+			off = 0;
+		} else {
+			if (off == (fraglen-1)) {
+				found = 1;
+				break;
+			} else if (off == 0) {
+				start = i;
+			}
+			off++;
+		}
+		
+		i++;
+	}
+
+	if (found) {
+		printf("FOUND STARTING AT +%lx (%lx)\n",
+		    (long unsigned)start,
+		    (long unsigned)start+foff);
+	} else {
+		printf("NOT FOUND\n");
+	}
+}
+
+static int
 processor(uint8_t *f, int fd, size_t l)
 {
+	uint8_t	frag[33];
 	size_t	start, off;
 	int	rc = EXIT_SUCCESS;
 	int	stop = 0;
@@ -226,7 +299,6 @@ processor(uint8_t *f, int fd, size_t l)
 		case 'e':
 			if (readnum(&off)) {
 				printf("\nINVALID OFFSET\n");
-				rc = EXIT_FAILURE;
 				break;
 			}
 
@@ -256,7 +328,29 @@ processor(uint8_t *f, int fd, size_t l)
 
 			printf("\nEXTENDED %lu BYTES\n", (long unsigned)off);
 			break;
+		case 'f':
+			if (readnum(&start) || (start >= l)) {
+				printf("\nINVALID START\n");
+				break;
+			}
 
+			if (readnum(&off)) {
+				printf("\nINVALID LENGTH\n");
+				break;
+			}
+
+			if (-1 == read_fragment(frag, off)) {
+				printf("\nINVALID FRAGMENT\n");
+				break;
+			}
+
+			printf("\nFIND FRAG FROM %lx SIZE %lu\n", start, off);
+			find_frag(f+start, l-start, start, frag, off);
+			break;
+		case 'l':
+			printf(" %lx\n", l);
+			break;
+		case 0x4:
 		case 'q':
 			printf("\nQUIT\n");
 			stop++;
