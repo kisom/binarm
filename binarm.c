@@ -122,7 +122,7 @@ readnum(size_t *n)
 
 
 static void
-printhex(uint8_t *buf, size_t l)
+printhex(uint8_t *buf, size_t l, size_t off)
 {
 	size_t	i;
 	long    n = (long)l;
@@ -130,6 +130,7 @@ printhex(uint8_t *buf, size_t l)
 	printf("\n");
 	l = 0;
 	while (n >= 0) {
+		printf("%08lx | ", off+l);
 		for (i = 0; i < 8 && --n >= 0; i++) {
 			printf("%02x ", buf[l++]);
 		}
@@ -368,7 +369,7 @@ processor(uint8_t *f, int fd, size_t l)
 				break;
 			}
 
-			printhex(f+start, off);
+			printhex(f+start, off, start);
 			break;
 		case 'w':
 			if (readnum(&start) || (start >=l)) {
