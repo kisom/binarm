@@ -201,7 +201,7 @@ writehex(uint8_t *buf, size_t lim)
 		ch = fgetc(stdin);
 	}
 
-	printf("\nWROTE %lu BYTES\n", (long unsigned)off);
+	printf("\nWROTE %lu BYTE(S)\n", (long unsigned)off);
 }
 
 
