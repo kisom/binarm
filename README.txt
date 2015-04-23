@@ -69,6 +69,7 @@ machine); accordingly, instead of the instruction 01442418, the target
 instruction is 0145fc. The relevant instruction look up is found in [2].
 
 First, build the (incorrect) client auth program:
+
 	$ cat test1.c
 	/*
 	 * client-auth1.c

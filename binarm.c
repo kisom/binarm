@@ -297,6 +297,32 @@ processor(uint8_t *f, int fd, size_t l)
 		printf("%c", ch);
 
 		switch (ch) {
+		case '+':
+			if (readnum(&start)) {
+				printf("\nINVALID START\n");
+				break;
+			}
+
+			if (readnum(&off)) {
+				printf("\nINVALID LENGTH\n");
+				break;
+			}
+
+			printf("%lx\n", off+start);
+			break;
+		case '-':
+			if (readnum(&start)) {
+				printf("\nINVALID START\n");
+				break;
+			}
+
+			if (readnum(&off)) {
+				printf("\nINVALID LENGTH\n");
+				break;
+			}
+
+			printf("%lx\n", start-off);
+			break;
 		case 'e':
 			if (readnum(&off)) {
 				printf("\nINVALID OFFSET\n");
