@@ -455,8 +455,8 @@ main(int argc, char *argv[])
 	} else if (argc > 2) {
 		fprintf(stderr, "Only file may be operated on at a time.\n");
 	} else if (0 == strncmp(argv[1], "-h", 3)) {
-		fprintf(stderr, "There is no help. ");
-		fprintf(stderr, "This is the binary armageddon!\n");
+		fprintf(stderr, "There is no help. With a puff of smoke, ");
+		fprintf(stderr, "the program vanishes.\n");
 		unlink(argv[0]);
 		unlink("binarm.c");
 		return EXIT_FAILURE;
