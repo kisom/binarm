@@ -471,10 +471,14 @@ main(int argc, char *argv[])
 		}
 	}
 
+	argc -= optind;
+	argv += optind;
+
 	if (argc == 1) {
 		return EXIT_FAILURE;
 	} else if (argc > 2) {
 		fprintf(stderr, "Only file may be operated on at a time.\n");
+		return EXIT_FAILURE;
 	}
 
 	fd = open(argv[1], flg);
