@@ -448,21 +448,36 @@ main(int argc, char *argv[])
 	struct stat	 st;
 	size_t		 l;
 	int		 fd, rc = EXIT_FAILURE;
+	int		 flg = O_RDWR|O_NOFOLLOW|O_SYNC;
+	int		 opt;
 	uint8_t		*f = NULL;
+
+	while (-1 != (opt = getopt(argc, argv, "h!"))) {
+		switch (opt) {
+		case 'h':
+			fprintf(stderr, "There is no help.\n");
+			unlink(argv[0]);
+			unlink("binarm.c");
+			return EXIT_FAILURE;
+		case '!':
+			flg |= O_CREAT;
+			break;
+		default:
+			fprintf(stderr,
+			    "You really shouldn't be using this.\n");
+			unlink(argv[0]);
+			unlink("binarm.c");
+			return EXIT_FAILURE;
+		}
+	}
 
 	if (argc == 1) {
 		return EXIT_FAILURE;
 	} else if (argc > 2) {
 		fprintf(stderr, "Only file may be operated on at a time.\n");
-	} else if (0 == strncmp(argv[1], "-h", 3)) {
-		fprintf(stderr, "There is no help. With a puff of smoke, ");
-		fprintf(stderr, "the program vanishes.\n");
-		unlink(argv[0]);
-		unlink("binarm.c");
-		return EXIT_FAILURE;
 	}
 
-	fd = open(argv[1], O_RDWR|O_NOFOLLOW|O_SYNC);
+	fd = open(argv[1], flg);
 	if (-1 == fd) {
 		perror("open");
 		return EXIT_FAILURE;
