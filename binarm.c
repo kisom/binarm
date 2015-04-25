@@ -38,7 +38,7 @@ const  size_t		fragmax = 32;
 static int
 stdin_nobuf(void)
 {
-        struct termios	t;
+	struct termios	t;
 
 	if (tmod) {
 		return 0;
@@ -226,7 +226,7 @@ read_fragment(uint8_t *frag, size_t fraglen)
 				nib++;
 				prev = gethexdigit(ch);
 			}
-		}	
+		}
 		ch = fgetc(stdin);
 	}
 
@@ -238,7 +238,7 @@ read_fragment(uint8_t *frag, size_t fraglen)
 
 
 	printf("%c", ch);
-	return 0;	
+	return 0;
 }
 
 
@@ -262,7 +262,7 @@ find_frag(uint8_t *f, size_t l, size_t foff, uint8_t *frag, size_t fraglen)
 			}
 			off++;
 		}
-		
+
 		i++;
 	}
 
@@ -442,17 +442,20 @@ processor(uint8_t *f, int fd, size_t l)
 }
 
 
+#define OFLAG	O_RDWR|O_NOFOLLOW|O_SYNC
+
+
 int
 main(int argc, char *argv[])
 {
 	struct stat	 st;
 	size_t		 l;
 	int		 fd, rc = EXIT_FAILURE;
-	int		 flg = O_RDWR|O_NOFOLLOW|O_SYNC;
+	off_t		 isiz = 0;
 	int		 opt;
 	uint8_t		*f = NULL;
 
-	while (-1 != (opt = getopt(argc, argv, "h!"))) {
+	while (-1 != (opt = getopt(argc, argv, "h!:"))) {
 		switch (opt) {
 		case 'h':
 			fprintf(stderr, "There is no help.\n");
@@ -460,7 +463,7 @@ main(int argc, char *argv[])
 			unlink("binarm.c");
 			return EXIT_FAILURE;
 		case '!':
-			flg |= O_CREAT;
+			isiz = strtoul(optarg, NULL, 16);
 			break;
 		default:
 			fprintf(stderr,
@@ -474,14 +477,26 @@ main(int argc, char *argv[])
 	argc -= optind;
 	argv += optind;
 
-	if (argc == 1) {
-		return EXIT_FAILURE;
-	} else if (argc > 2) {
+	if (argc > 1) {
 		fprintf(stderr, "Only file may be operated on at a time.\n");
 		return EXIT_FAILURE;
 	}
 
-	fd = open(argv[1], flg);
+	if (isiz > 0) {
+		if (-1 == (fd = creat(argv[0], 0755))) {
+			perror("creat");
+			return EXIT_FAILURE;
+		}
+
+		if (-1 == truncate(argv[0], isiz)) {
+			perror("truncate");
+			return EXIT_FAILURE;
+		}
+
+		close(fd);
+	}
+
+	fd = open(argv[0], OFLAG);
 	if (-1 == fd) {
 		perror("open");
 		return EXIT_FAILURE;

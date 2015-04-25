@@ -4,7 +4,9 @@ If you have to use this, it's probably the end of the world as we know
 it --- do you feel fine?
 
 Commands are single lower-case letters, numbers are hexadecimal. Arguments
-are separated by spaces, commands are terminated with spaces or newlines.
+are separated by spaces, commands are terminated with spaces or
+newlines. If the file doesn't exist, it can be created with the -!  <size>
+flag. As with all other numbers in this program, this size is hexadecimal.
 
 COMMANDS:
 
