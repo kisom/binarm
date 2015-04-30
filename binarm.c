@@ -398,6 +398,10 @@ processor(uint8_t *f, int fd, size_t l)
 				break;
 			}
 
+			if (0 == off) {
+				off = (l - start);
+			}
+
 			printhex(f+start, off, start);
 			break;
 		case 's':
