@@ -278,6 +278,43 @@ find_frag(uint8_t *f, size_t l, size_t foff, uint8_t *frag, size_t fraglen)
 }
 
 static int
+expand(uint8_t **f, int fd, size_t l, size_t off)
+{
+	if (-1 == ftruncate(fd, l+off)) {
+		perror("ftruncate");
+		return -1;
+	}
+
+	if (-1 == munmap(*f, l)) {
+		perror("munmap");
+		return -1;
+	}
+
+	*f = mmap(NULL, l+off, PROT_READ|PROT_WRITE, MAP_SHARED,
+	    fd, 0);
+	if (NULL == *f) {
+		perror("mmap");
+		return -1;
+	}
+
+	return 0;
+}
+
+
+static int
+shift_by(uint8_t *f, size_t l)
+{
+	size_t	i;
+
+	for (i = 0; i < l; i++) {
+		f[i+1] = f[i];
+	}
+
+	f[0] = 0;
+	return 0;
+}
+
+static int
 processor(uint8_t *f, int fd, size_t l)
 {
 	uint8_t	frag[33];
@@ -332,30 +369,13 @@ processor(uint8_t *f, int fd, size_t l)
 				break;
 			}
 
-			if (-1 == ftruncate(fd, l+off)) {
-				perror("ftruncate");
-				stop = 1;
-				rc = EXIT_FAILURE;
-				break;
-			}
-
-			if (-1 == munmap(f, l)) {
-				perror("munmap");
+			if (-1 == expand(&f, fd, l, off)) {
 				stop = 1;
 				rc = EXIT_FAILURE;
 				break;
 			}
 
 			l += off;
-			f = mmap(NULL, l, PROT_READ|PROT_WRITE, MAP_SHARED,
-			    fd, 0);
-			if (NULL == f) {
-				perror("mmap");
-				stop = 1;
-				rc = EXIT_FAILURE;
-				break;
-			}
-
 			printf("\nEXTENDED %lu BYTES\n", (long unsigned)off);
 			break;
 		case 'f':
@@ -376,6 +396,25 @@ processor(uint8_t *f, int fd, size_t l)
 
 			printf("\nFIND FRAG FROM %lx SIZE %lu\n", start, off);
 			find_frag(f+start, l-start, start, frag, off);
+			break;
+		case 'i':
+			if (readnum(&start) || (start >= l)) {
+				printf("\nINVALID START\n");
+				break;
+			}
+
+			if (-1 == expand(&f, fd, l, 1)) {
+				stop = 1;
+				rc = EXIT_FAILURE;
+				break;
+			}
+			l++;
+
+			if (-1 == shift_by(f+start, l-start)) {
+				stop = 1;
+				rc = EXIT_FAILURE;
+				break;
+			}
 			break;
 		case 'l':
 			printf(" %lx\n", l);
@@ -484,6 +523,8 @@ main(int argc, char *argv[])
 	if (argc > 1) {
 		fprintf(stderr, "Only file may be operated on at a time.\n");
 		return EXIT_FAILURE;
+	} else if (0 == argc) {
+		return EXIT_SUCCESS;
 	}
 
 	if (isiz > 0) {

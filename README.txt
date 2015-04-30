@@ -13,6 +13,9 @@ COMMANDS:
 	e offset	Extend file +offset bytes.
 	f offset size	Find a size sequence of bytes starting at
 			offset. The maximum size is 32 bytes.
+	i start		Insert a byte at start. This will create a hole
+			at start, setting the byte to 0, and shift the
+			remaining data to the right one byte.
 	l		Print the current image size.
 	q		Quit. This should be the first command you enter.
 	r start offset	Read (and print) a hex dump of offset bytes from
