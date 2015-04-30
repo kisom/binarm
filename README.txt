@@ -16,7 +16,9 @@ COMMANDS:
 	l		Print the current image size.
 	q		Quit. This should be the first command you enter.
 	r start offset	Read (and print) a hex dump of offset bytes from
-			the file starting at start.
+			the file starting at start. If offset is 0, the
+			remainder of the file (after start) is read. For
+			example, `r 0 0` will read the entire file.
 	s offset size	Scan for all instances of the size-sized
 			fragment starting at offset.
 	w start		Start writing to the file at start.
