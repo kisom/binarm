@@ -528,6 +528,11 @@ main(int argc, char *argv[])
 	}
 
 	if (isiz > 0) {
+		if (0 == stat(argv[0], &st)) {
+			fprintf(stderr, "%s already exists.\n", argv[0]);
+			return EXIT_FAILURE;
+		}
+
 		if (-1 == (fd = creat(argv[0], 0755))) {
 			perror("creat");
 			return EXIT_FAILURE;
