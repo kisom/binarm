@@ -322,7 +322,7 @@ processor(uint8_t *f, int fd, size_t l)
 	ssize_t	scan;
 	int	rc = EXIT_SUCCESS;
 	int	stop = 0;
-	char	ch;
+	char	ch = 0;
 
 	if (stdin_nobuf()) {
 		return EXIT_FAILURE;
