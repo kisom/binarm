@@ -287,6 +287,7 @@ expand(uint8_t **f, int fd, size_t l, size_t off)
 
 	if (-1 == munmap(*f, l)) {
 		perror("munmap");
+		abort();
 		return -1;
 	}
 
